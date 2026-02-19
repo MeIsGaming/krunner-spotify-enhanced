@@ -6,6 +6,16 @@
 - Open KRunner and run `spe login` once to refresh your token.
 - Run `./debug.sh` and check for Python exceptions.
 
+## Spotify API 403 (commands appear but do nothing)
+
+- If KRunner shows `Spotify API denied request (403)`, your account is likely not allowed for your Spotify app.
+- Open Spotify Developer Dashboard and go to your app.
+- Add your Spotify account email under **Users and Access**.
+- Ensure the app is in the correct mode for your account access.
+- Then run:
+  - `spe login`
+  - `spe trackinfo`
+
 ## Plugin does not appear in KRunner
 
 - Reinstall service files:

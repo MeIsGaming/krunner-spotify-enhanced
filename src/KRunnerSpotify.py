@@ -65,12 +65,33 @@ class Runner(dbus.service.Object):
             return command.upper()
         return command
 
+    def _autocomplete_with_prefix(self, prefix: str, command_prefix: str):
+        """Return autocomplete results with runner prefix in the command payload."""
+        matches = Commands.autocompleteMatches(command_prefix)
+        prefixed_matches = []
+        for command, title, icon, relevance, score, actions in matches:
+            prefixed_matches.append(
+                (f"{prefix} {command}", title, icon, relevance, score, actions)
+            )
+        return prefixed_matches
+
+    def _spotify_error_message(self, error: SpotifyException) -> str:
+        """Create user-facing message for common Spotify API failures."""
+        if error.http_status == 403:
+            return (
+                "Spotify API denied request (403). Add your account in Spotify "
+                "Dashboard > Users and Access, then run: spe login"
+            )
+        if error.http_status == 401:
+            return "Spotify token expired/invalid. Run: spe login"
+        return f"Spotify API error ({error.http_status})"
+
     def _match_impl(self, query: str):
         """Handle KRunner Match requests and return result tuples."""
         lowered_query = query.lower().strip()
         accepted_prefixes = self._get_accepted_prefixes()
         if lowered_query in accepted_prefixes:
-            return Commands.autocompleteMatches("")
+            return self._autocomplete_with_prefix(lowered_query, "")
 
         matched_prefix = ""
         for prefix in accepted_prefixes:
@@ -85,7 +106,7 @@ class Runner(dbus.service.Object):
         query = query[len(matched_prefix) :].strip()
 
         if query == "":
-            return Commands.autocompleteMatches("")
+            return self._autocomplete_with_prefix(matched_prefix.strip(), "")
 
         arguments = ""
         if " " in query:
@@ -96,7 +117,7 @@ class Runner(dbus.service.Object):
             command = self._normalize_command(command)
 
             if arguments == "" and command not in Commands.getCommandNames():
-                return Commands.autocompleteMatches(command)
+                return self._autocomplete_with_prefix(matched_prefix.strip(), command)
 
             return Commands.executeCommand(command, self.spotify).Match(arguments)
         except RuntimeError as e:
@@ -114,10 +135,7 @@ class Runner(dbus.service.Object):
             logger.warning("Match runtime error: %s", e)
             return []
         except SpotifyException as e:
-            message = f"Spotify API error ({e.http_status})"
-            if e.http_status == 403:
-                message = "Spotify API denied request (403). Check app/user permissions."
-            return [("", message, "Spotify", 100, 100, {})]
+            return [("", self._spotify_error_message(e), "Spotify", 100, 100, {})]
         except Exception as e:
             logger.exception("Unexpected match error: %s", e)
             return []
