@@ -1,0 +1,15 @@
+[Desktop Entry]
+Name=KRunner SpotifyEnhanced
+Comment=Plugin to control Spotify from KRunner (SpotifyEnhanced)
+X-KDE-ServiceTypes=Plasma/Runner
+Type=Service
+Icon=Spotify
+X-KDE-PluginInfo-Author=Ashley (MeIsGaming)
+X-KDE-PluginInfo-Email=info@meisgaming.net
+X-KDE-PluginInfo-Name=KRunnerSpotifyEnhanced
+X-KDE-PluginInfo-Version=2.0
+X-KDE-PluginInfo-License=GPL-3.0
+X-KDE-PluginInfo-EnabledByDefault=true
+X-Plasma-API=DBus
+X-Plasma-DBusRunner-Service=org.kde.KRunnerSpotify
+X-Plasma-DBusRunner-Path=/KRunnerSpotify

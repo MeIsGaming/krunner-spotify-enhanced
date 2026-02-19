@@ -1,0 +1,12 @@
+{
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "**/__pycache__",
+        ".venv"
+    ],
+    "typeCheckingMode": "basic",
+    "reportMissingModuleSource": "none",
+    "reportMissingImports": "none"
+}

@@ -1,0 +1,12 @@
+[Unit]
+Description=KRunner SpotifyEnhanced Runner
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%{PROJECTDIR}/.venv/bin/python %{PROJECTDIR}/src/KRunnerSpotify.py
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target
