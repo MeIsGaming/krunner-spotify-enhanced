@@ -1,20 +1,22 @@
+import logging
 import os
 import sys
-import logging
+
+import dbus.service
+import spotipy
+from dbus.mainloop.glib import DBusGMainLoop
+from gi.repository import GLib  # type: ignore
+from spotipy.oauth2 import SpotifyPKCE
+
+from commands import Commands
+from Config import getCommandName, getSetting
+from Util import handle_spotify_uri
 
 # Add the src directory to Python path so imports work when run via D-Bus
 script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
-from commands import Commands
-from dbus.mainloop.glib import DBusGMainLoop
-from gi.repository import GLib
-from spotipy.oauth2 import SpotifyPKCE
-from Config import getCommandName, getSetting
-from Util import handle_spotify_uri
-import dbus.service
-import spotipy
 
 DBusGMainLoop(set_as_default=True)
 
@@ -29,39 +31,67 @@ iface2 = "org.kde.krunner2"
 
 class Runner(dbus.service.Object):
     def __init__(self):
-        dbus.service.Object.__init__(self, dbus.service.BusName(
-            "org.kde.KRunnerSpotify", dbus.SessionBus()), objpath)
+        dbus.service.Object.__init__(
+            self, dbus.service.BusName("org.kde.KRunnerSpotify", dbus.SessionBus()), objpath
+        )
         os.makedirs(os.path.dirname(getSetting("CACHE_PATH")), exist_ok=True)
-        self.auth_manager = SpotifyPKCE(client_id=getSetting("CLIENT_ID"),
-                                        cache_path=getSetting("CACHE_PATH"),
-                                        redirect_uri=getSetting(
-                                            "REDIRECT_URI"),
-                                        scope=getSetting("ACCES_SCOPE"))
+        self.auth_manager = SpotifyPKCE(
+            client_id=getSetting("CLIENT_ID"),
+            cache_path=getSetting("CACHE_PATH"),
+            redirect_uri=getSetting("REDIRECT_URI"),
+            scope=getSetting("ACCES_SCOPE"),
+        )
         self.spotify = spotipy.Spotify(auth_manager=self.auth_manager)
 
-    def _match_impl(self, query: str):
+    def _get_prefix(self) -> str:
         prefix = getSetting("COMMAND_PREFIX").strip().lower()
-        if prefix == "":
-            prefix = "spe"
+        return prefix or "spe"
+
+    def _normalize_command(self, command: str) -> str:
+        if getSetting("CASE_SENSITIVE") == "False":
+            return command.upper()
+        return command
+
+    def _match_impl(self, query: str):
+        prefix = self._get_prefix()
 
         expected_prefix = prefix + " "
+        lowered_query = query.lower().strip()
+        if lowered_query == prefix:
+            return Commands.autocompleteMatches("")
+
         if not query.lower().startswith(expected_prefix):
             return []
-        
-        query = query[len(expected_prefix):]
-        
+
+        query = query[len(expected_prefix) :].strip()
+
+        if query == "":
+            return Commands.autocompleteMatches("")
+
         arguments = ""
-        if(" " in query):
+        if " " in query:
             command, arguments = query.split(" ", 1)
         else:
             command = query
         try:
-            if(getSetting("CASE_SENSITIVE") == "False"):
-                command = command.upper()
+            command = self._normalize_command(command)
+
+            if arguments == "" and command not in Commands.getCommandNames():
+                return Commands.autocompleteMatches(command)
+
             return Commands.executeCommand(command, self.spotify).Match(arguments)
         except RuntimeError as e:
-            if(str(e) == "Not logged in!"):
-                return [(getCommandName("LOGIN_COMMAND"), "Not logged in, click to login", "Spotify", 100, 100, {})]
+            if str(e) == "Not logged in!":
+                return [
+                    (
+                        getCommandName("LOGIN_COMMAND"),
+                        "Not logged in, click to login",
+                        "Spotify",
+                        100,
+                        100,
+                        {},
+                    )
+                ]
             logger.warning("Match runtime error: %s", e)
             return []
         except Exception as e:
@@ -69,24 +99,29 @@ class Runner(dbus.service.Object):
             return []
 
     def _run_impl(self, data: str, action_id: str):
+        del action_id
+
         # If data is a Spotify URI (from search results), handle it directly
         if data.startswith("spotify:"):
             handle_spotify_uri(self.spotify, data)
             return
-        
-        prefix = getSetting("COMMAND_PREFIX").strip().lower()
-        if prefix == "":
-            prefix = "spe"
+
+        prefix = self._get_prefix()
 
         expected_prefix = prefix + " "
         if data.lower().startswith(expected_prefix):
-            data = data[len(expected_prefix):]
-        
+            data = data[len(expected_prefix) :].strip()
+
+        if data == "":
+            return
+
         command = data
-        if(" " in data):
+        if " " in data:
             command, data = data.split(" ", 1)
         else:
             data = ""
+
+        command = self._normalize_command(command)
         try:
             Commands.executeCommand(command, self.spotify).Run(data)
         except RuntimeError as e:

@@ -17,7 +17,14 @@ lint:
 	@if [ -x .venv/bin/pyright ]; then .venv/bin/pyright; else echo "pyright not installed in .venv"; fi
 
 shellcheck:
-	shellcheck -x -S warning install.sh uninstall.sh debug.sh
+	@if command -v shellcheck >/dev/null 2>&1; then \
+		shellcheck -x -S warning install.sh uninstall.sh debug.sh; \
+	elif [ -x .venv/bin/shellcheck ]; then \
+		.venv/bin/shellcheck -x -S warning install.sh uninstall.sh debug.sh; \
+	else \
+		echo "shellcheck not installed (system or .venv/bin/shellcheck)"; \
+		exit 1; \
+	fi
 
 verify-install:
 	ls -l $(HOME)/.local/share/krunner/dbusplugins/plasma-runner-KRunnerSpotify.desktop

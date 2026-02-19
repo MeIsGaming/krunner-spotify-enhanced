@@ -1,6 +1,7 @@
-from .Command import Command
 from Config import getCommandName, getSetting
-from Util import parseSearchQuery, parseTracks
+from Util import parseSearchQuery
+
+from .Command import Command
 
 
 class Podcast(Command):
@@ -11,7 +12,8 @@ class Podcast(Command):
         query, page = parseSearchQuery(query)
         trackOffset = int(getSetting("MAX_RESULTS")) * (page - 1)
         results = self.spotify.search(
-            q=query, limit=int(getSetting("MAX_RESULTS")), offset=trackOffset, type="show")
+            q=query, limit=int(getSetting("MAX_RESULTS")), offset=trackOffset, type="show"
+        )
         return self.ParsePodcasts(results)
 
     def Run(self, data: str):
@@ -21,8 +23,8 @@ class Podcast(Command):
         parsedResults = []
         for show in results["shows"]["items"]:
             parsedResults.append(
-                (show["uri"], show["name"] + " - " + show["publisher"], "Spotify", 100, 100, {}))
-        if(not parsedResults):
-            parsedResults.append(
-                ("", "No podcasts found!", "Spotify", 100, 100, {}))
+                (show["uri"], show["name"] + " - " + show["publisher"], "Spotify", 100, 100, {})
+            )
+        if not parsedResults:
+            parsedResults.append(("", "No podcasts found!", "Spotify", 100, 100, {}))
         return parsedResults

@@ -1,6 +1,7 @@
-from .Command import Command
 from Config import getCommandName, getSetting
-from Util import parseSearchQuery, parseArtists, handle_spotify_uri
+from Util import handle_spotify_uri, parseArtists, parseSearchQuery
+
+from .Command import Command
 
 
 class Artist(Command):
@@ -10,14 +11,16 @@ class Artist(Command):
     def Match(self, query: str):
         query, page = parseSearchQuery(query)
         searchResults = []
-        if(query != ""):
+        if query != "":
             query = "artist:" + query
             trackOffset = int(getSetting("MAX_RESULTS")) * (page - 1)
-            searchResults = self.spotify.search(query, int(
-                getSetting("MAX_RESULTS")), trackOffset, "artist")['artists']
+            searchResults = self.spotify.search(
+                query, int(getSetting("MAX_RESULTS")), trackOffset, "artist"
+            )["artists"]
         else:
             searchResults = self.spotify.current_user_top_artists(
-                limit=int(getSetting("MAX_RESULTS")))
+                limit=int(getSetting("MAX_RESULTS"))
+            )
         return parseArtists(searchResults)
 
     def Run(self, data: str):

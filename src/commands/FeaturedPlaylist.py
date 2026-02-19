@@ -1,6 +1,7 @@
-from .Command import Command
 from Config import getCommandName, getSetting
-from Util import parseSearchQuery, parsePlaylists
+from Util import parsePlaylists, parseSearchQuery
+
+from .Command import Command
 
 
 class FeaturedPlaylist(Command):
@@ -11,7 +12,8 @@ class FeaturedPlaylist(Command):
         query, page = parseSearchQuery(query)
         playlistOffset = int(getSetting("MAX_RESULTS")) * (page - 1)
         searchResults = self.spotify.featured_playlists(
-            limit=int(getSetting("MAX_RESULTS")), offset=playlistOffset)
+            limit=int(getSetting("MAX_RESULTS")), offset=playlistOffset
+        )
         return parsePlaylists(searchResults["playlists"])
 
     def Run(self, data: str):

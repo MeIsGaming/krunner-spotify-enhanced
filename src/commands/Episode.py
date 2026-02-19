@@ -1,7 +1,7 @@
+from Config import getCommandName, getSetting
+from Util import parsePage
+
 from .Command import Command
-from Config import getCommandName
-from Util import parseSearchQuery, parsePage
-from Config import getSetting, getCommandName
 
 
 class Episode(Command):
@@ -11,19 +11,18 @@ class Episode(Command):
     def Match(self, query: str):
         page = int(parsePage(query))
         episodeOffset = int(getSetting("MAX_RESULTS")) * (page - 1)
-        playbackDetails = self.spotify.currently_playing(
-            additional_types="episode")
-        if(playbackDetails["item"]["type"] == "episode"):
+        playbackDetails = self.spotify.currently_playing(additional_types="episode")
+        if playbackDetails["item"]["type"] == "episode":
             episodes = self.spotify.show_episodes(
-                playbackDetails["item"]["show"]['id'], offset=episodeOffset, limit=int(getSetting("MAX_RESULTS")))
+                playbackDetails["item"]["show"]["id"],
+                offset=episodeOffset,
+                limit=int(getSetting("MAX_RESULTS")),
+            )
             episodeResults = []
             relevance = 100
-            for episode in episodes['items']:
+            for episode in episodes["items"]:
                 icon = self.GetIcon(episode, playbackDetails)
-                episodeResults.append((episode["uri"],
-                                       episode["name"],
-                                       icon,
-                                       relevance, 100, {}))
+                episodeResults.append((episode["uri"], episode["name"], icon, relevance, 100, {}))
                 relevance = relevance - 1
             return episodeResults
         else:

@@ -1,6 +1,7 @@
-from .Command import Command
 from Config import getCommandName, getSetting
-from Util import parseSearchQuery, parseArtists
+from Util import parseArtists, parseSearchQuery
+
+from .Command import Command
 
 
 class TopArtist(Command):
@@ -12,7 +13,8 @@ class TopArtist(Command):
         query, page = parseSearchQuery(query)
         trackOffset = int(getSetting("MAX_RESULTS")) * (page - 1)
         searchResults = self.spotify.current_user_top_artists(
-                limit=int(getSetting("MAX_RESULTS")), offset = trackOffset)
+            limit=int(getSetting("MAX_RESULTS")), offset=trackOffset
+        )
         return parseArtists(searchResults)
 
     def Run(self, data: str):

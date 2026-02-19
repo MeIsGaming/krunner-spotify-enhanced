@@ -1,6 +1,7 @@
-from .Command import Command
 from Config import getCommandName, getSetting
-from Util import parseSearchQuery, parsePlaylists
+from Util import parsePlaylists, parseSearchQuery
+
+from .Command import Command
 
 
 class MyPlaylist(Command):
@@ -12,7 +13,8 @@ class MyPlaylist(Command):
         user = self.spotify.current_user()
         playlistOffset = int(getSetting("MAX_RESULTS")) * (page - 1)
         playlists = self.spotify.user_playlists(
-            user["id"], int(getSetting("MAX_RESULTS")), playlistOffset)
+            user["id"], int(getSetting("MAX_RESULTS")), playlistOffset
+        )
         return parsePlaylists(playlists)
 
     def Run(self, data: str):

@@ -61,6 +61,7 @@ spe trackinfo
 ## Quick Usage
 
 ```text
+spe
 spe login
 spe play bohemian rhapsody
 spe next
@@ -89,6 +90,7 @@ the user `systemd` service keeps the runner available in the background.
 
 ## Documentation
 
+- [wiki/README.md](wiki/README.md): multilingual wiki entrypoint (DE/EN, extensible)
 - [USAGE.md](USAGE.md): command reference
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): local dev guide
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md): common issues

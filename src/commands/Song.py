@@ -1,6 +1,8 @@
-from .Command import Command
 from Config import getCommandName, getSetting
-from Util import parseSearchQuery, parseTracks, handle_spotify_uri
+from Util import handle_spotify_uri, parseSearchQuery, parseTracks
+
+from .Command import Command
+
 
 class Song(Command):
     def __init__(self, spotify):
@@ -8,13 +10,18 @@ class Song(Command):
 
     def Match(self, query: str):
         searchResults = []
-        if(query != ""):
+        if query != "":
             query, page = parseSearchQuery(query)
             trackOffset = int(getSetting("MAX_RESULTS")) * (page - 1)
             searchResults = self.spotify.search(
-                query, int(getSetting("MAX_RESULTS")), trackOffset, "track")
+                query, int(getSetting("MAX_RESULTS")), trackOffset, "track"
+            )
         else:
-            searchResults = {"tracks": self.spotify.current_user_top_tracks(offset = 0, limit = int(getSetting("MAX_RESULTS")))}
+            searchResults = {
+                "tracks": self.spotify.current_user_top_tracks(
+                    offset=0, limit=int(getSetting("MAX_RESULTS"))
+                )
+            }
         return parseTracks(searchResults)
 
     def Run(self, data: str):
