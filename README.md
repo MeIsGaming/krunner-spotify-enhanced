@@ -85,6 +85,17 @@ Config file path:
 
 - `~/.config/KRunner-Spotify/KRunner-Spotify.config`
 
+## Common Fixes
+
+- If only one suggestion appears when typing `spe`, restart KRunner and service:
+
+```sh
+kquitapp6 krunner
+systemctl --user restart krunner-spotify.service
+```
+
+- If commands still show `403`, verify `CLIENT_ID`, `REDIRECT_URI`, and app user access in Spotify Dashboard.
+
 ## Quality & Tests
 
 ```sh

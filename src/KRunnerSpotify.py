@@ -70,8 +70,16 @@ class Runner(dbus.service.Object):
         matches = Commands.autocompleteMatches(command_prefix)
         prefixed_matches = []
         for command, title, icon, relevance, score, actions in matches:
+            display_command = f"{prefix} {command.lower()}"
             prefixed_matches.append(
-                (f"{prefix} {command}", title, icon, relevance, score, actions)
+                (
+                    f"{prefix} {command}",
+                    f"{display_command} — {title}",
+                    icon,
+                    relevance,
+                    score,
+                    actions,
+                )
             )
         return prefixed_matches
 
