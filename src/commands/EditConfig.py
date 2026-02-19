@@ -7,6 +7,8 @@ from .Command import Command
 
 
 class EditConfig(Command):
+    """Open the local KRunner Spotify config in the configured editor."""
+
     def __init__(self, spotify):
         self.command = getCommandName("EDIT_CONFIG_COMMAND")
 
@@ -28,4 +30,5 @@ class EditConfig(Command):
             ]
 
     def Run(self, data: str):
+        """Spawn external editor process for the config file."""
         subprocess.Popen([getSetting("CONFIG_EDITOR"), CONFIG_FILE_LOCATION])

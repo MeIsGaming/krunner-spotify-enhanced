@@ -50,6 +50,8 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.pytest-home/
+.ruff_cache/
 
 # Translations
 *.mo
@@ -127,3 +129,17 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Editor settings
+.idea/
+.vscode/
+
+# Temporary files
+*.swp
+*.swo
+*.tmp
+
+# Build artifacts
+packaging/**/pkg/
+packaging/**/src/
+packaging/**/.SRCINFO.tmp

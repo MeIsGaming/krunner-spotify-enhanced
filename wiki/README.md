@@ -10,9 +10,17 @@ Diese Wiki-Struktur ist sprachbasiert aufgebaut und leicht erweiterbar.
 
 ## Neue Sprache hinzufügen
 
-1. Kopiere `wiki/templates/language-index-template.md` nach `wiki/<lang>/index.md`.
+1. Kopiere `wiki/templates/language-index-template.md` nach
+   `wiki/<lang>/index.md`.
 2. Lege die Seiten `install.md`, `commands.md`, `troubleshooting.md` im selben Ordner an.
 3. Verlinke die Sprache in dieser Datei.
+
+## Qualitätsrichtlinien
+
+- Beispiele immer mit `spe` (oder dokumentiertem Alias) schreiben.
+- Befehle als kopierbare Blöcke (`bash`/`text`) angeben.
+- Pro Sprachordner gleiche Seitennamen beibehalten.
+- Änderungen an Befehlsbeispielen mit `make docs-check` verifizieren.
 
 ## Verfügbare Sprachen
 

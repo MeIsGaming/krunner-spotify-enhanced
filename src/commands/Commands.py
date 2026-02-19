@@ -26,6 +26,7 @@ from .Song import Song
 
 
 def _build_command_specs():
+    """Return command registry: (config key, command class, short description)."""
     return [
         ("NEXT_COMMAND", Next, "Skip to next track"),
         ("PREVIOUS_COMMAND", Previous, "Go to previous track"),
@@ -68,10 +69,12 @@ def _build_command_descriptions():
 
 
 def getCommandNames():
+    """Return all command names sorted for autocomplete and lookup."""
     return sorted(_build_command_map())
 
 
 def autocompleteMatches(command_prefix: str):
+    """Create autocomplete tuples for a partial command name."""
     command_prefix = command_prefix or ""
     descriptions = _build_command_descriptions()
     matches = []
@@ -92,6 +95,7 @@ def autocompleteMatches(command_prefix: str):
 
 
 def executeCommand(command, spotify):
+    """Instantiate command handler for a normalized command token."""
     command_map = _build_command_map()
     if command in command_map:
         return command_map[command](spotify)

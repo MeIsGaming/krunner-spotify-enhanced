@@ -18,6 +18,18 @@
 - Python lint/type checks are in GitHub Actions.
 - Shell scripts are linted with ShellCheck in CI.
 
+Run locally:
+
+- `make lint`
+- `make shellcheck`
+- `make docs-check`
+- `make test`
+- `make smoke`
+
+Optional integration run:
+
+- `make test-integration`
+
 ## Manual smoke test flow
 
 1. `./install.sh`
@@ -32,3 +44,4 @@
 
 - Keep `README.md` and `CREDITS.md` updated when ownership changes.
 - Keep this fork attribution clear (GPL and upstream credits).
+- Keep AUR metadata in `packaging/aur` and `packaging/aur-stable` in sync.

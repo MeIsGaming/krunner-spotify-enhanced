@@ -5,7 +5,11 @@ CONFIG_FILE_LOCATION = os.path.expanduser("~") + "/.config/KRunner-Spotify/KRunn
 REQUIRED_SECTIONS = ("Settings", "CommandNames")
 
 
+"""Config helper functions for reading KRunner Spotify settings and command names."""
+
+
 def loadConfig():
+    """Load and validate the user config file into the global parser."""
     read_files = config.read(CONFIG_FILE_LOCATION)
     if not read_files:
         raise RuntimeError(f"Configuration file not found: {CONFIG_FILE_LOCATION}")
@@ -23,6 +27,7 @@ def loadConfig():
 
 
 def getCommandName(commandName):
+    """Resolve configured command name, honoring case sensitivity setting."""
     if commandName not in config["CommandNames"]:
         raise KeyError(f"Command '{commandName}' not found in config")
 
@@ -32,9 +37,21 @@ def getCommandName(commandName):
 
 
 def getSetting(settingName):
+    """Fetch a required setting from config."""
     if settingName not in config["Settings"]:
         raise KeyError(f"Setting '{settingName}' not found in config")
     return config["Settings"][settingName]
+
+
+def getSettingOrDefault(settingName, defaultValue):
+    """Return setting value if present, otherwise a caller-provided default."""
+    return config["Settings"].get(settingName, defaultValue)
+
+
+def getBoolSetting(settingName, defaultValue=False):
+    """Parse common boolean-like setting strings into booleans."""
+    value = getSettingOrDefault(settingName, str(defaultValue))
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
 config = configparser.ConfigParser()

@@ -1,6 +1,7 @@
 # KRunner SpotifyEnhanced
 
-Control [Spotify](https://www.spotify.com/) directly from [KRunner](https://github.com/KDE/krunner) using `spe` commands.
+Control [Spotify](https://www.spotify.com/) directly from
+[KRunner](https://github.com/KDE/krunner) using `spe` commands.
 
 ## Highlights
 
@@ -71,6 +72,35 @@ spe resume
 
 Full command reference: [USAGE.md](USAGE.md)
 
+## Compatibility
+
+- Primary command prefix is `spe`.
+- Optional legacy alias mode (`sp`) can be enabled in config:
+
+```ini
+ENABLE_LEGACY_SP_ALIAS = True
+```
+
+Config file path:
+
+- `~/.config/KRunner-Spotify/KRunner-Spotify.config`
+
+## Quality & Tests
+
+```sh
+make lint
+make shellcheck
+make docs-check
+make test
+make smoke
+```
+
+Optional integration tests (requires running DBus service):
+
+```sh
+make test-integration
+```
+
 ## Debug / Uninstall
 
 ```sh
@@ -97,11 +127,13 @@ the user `systemd` service keeps the runner available in the background.
 - [CONTRIBUTING.md](CONTRIBUTING.md): contribution rules
 - [CREDITS.md](CREDITS.md): attribution and maintainer info
 - [CHANGELOG.md](CHANGELOG.md): release notes
+- [packaging/aur](packaging/aur): AUR `-git` package files
+- [packaging/aur-stable](packaging/aur-stable): AUR stable package files
 
 ## Maintainer
 
 - Ashley (MeIsGaming)
-- Contact: info@meisgaming.net
+- Contact: <mailto:info@meisgaming.net>
 
 ## Credits
 
@@ -110,7 +142,7 @@ This repository is a maintained fork and keeps clear attribution:
 - Original project author: Martijn Vogelaar
 - Maintained/extended by: Jochem Kuipers
 - Current fork maintainer: Ashley (MeIsGaming)
-- Upstream: https://github.com/JochemKuipers/krunner-spotify
+- Upstream: <https://github.com/JochemKuipers/krunner-spotify>
 
 ## License
 

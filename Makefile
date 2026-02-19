@@ -1,4 +1,4 @@
-.PHONY: install install-no-restart uninstall debug lint shellcheck verify-install service-status service-restart smoke
+.PHONY: install install-no-restart uninstall debug lint shellcheck verify-install service-status service-restart smoke test test-integration docs-check
 
 install:
 	./install.sh
@@ -40,3 +40,29 @@ service-restart:
 smoke:
 	@dbus-send --session --print-reply --dest=org.kde.KRunnerSpotify /KRunnerSpotify org.kde.krunner1.Match string:'spe login' >/dev/null
 	@echo "Smoke test OK"
+
+test:
+	@mkdir -p .pytest-home
+	@if [ -x .venv/bin/pytest ]; then \
+		HOME="$(PWD)/.pytest-home" .venv/bin/pytest -m "not integration"; \
+	else \
+		echo "pytest not installed in .venv"; \
+		exit 1; \
+	fi
+
+test-integration:
+	@mkdir -p .pytest-home
+	@if [ -x .venv/bin/pytest ]; then \
+		HOME="$(PWD)/.pytest-home" .venv/bin/pytest -m integration; \
+	else \
+		echo "pytest not installed in .venv"; \
+		exit 1; \
+	fi
+
+docs-check:
+	@if [ -x .venv/bin/python ]; then \
+		.venv/bin/python scripts/check_localized_examples.py; \
+	else \
+		echo "python not available in .venv"; \
+		exit 1; \
+	fi

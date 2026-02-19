@@ -6,10 +6,11 @@ import dbus.service
 import spotipy
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib  # type: ignore
+from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyPKCE
 
 from commands import Commands
-from Config import getCommandName, getSetting
+from Config import getBoolSetting, getCommandName, getSetting
 from Util import handle_spotify_uri
 
 # Add the src directory to Python path so imports work when run via D-Bus
@@ -30,7 +31,10 @@ iface2 = "org.kde.krunner2"
 
 
 class Runner(dbus.service.Object):
+    """DBus-backed KRunner runner for Spotify commands."""
+
     def __init__(self):
+        """Initialize DBus object and Spotify PKCE client."""
         dbus.service.Object.__init__(
             self, dbus.service.BusName("org.kde.KRunnerSpotify", dbus.SessionBus()), objpath
         )
@@ -44,26 +48,41 @@ class Runner(dbus.service.Object):
         self.spotify = spotipy.Spotify(auth_manager=self.auth_manager)
 
     def _get_prefix(self) -> str:
+        """Return normalized command prefix from config, with safe fallback."""
         prefix = getSetting("COMMAND_PREFIX").strip().lower()
         return prefix or "spe"
 
+    def _get_accepted_prefixes(self) -> list[str]:
+        """Return accepted prefixes, optionally including legacy alias."""
+        prefixes = [self._get_prefix()]
+        if getBoolSetting("ENABLE_LEGACY_SP_ALIAS", False) and "sp" not in prefixes:
+            prefixes.append("sp")
+        return prefixes
+
     def _normalize_command(self, command: str) -> str:
+        """Normalize command according to CASE_SENSITIVE setting."""
         if getSetting("CASE_SENSITIVE") == "False":
             return command.upper()
         return command
 
     def _match_impl(self, query: str):
-        prefix = self._get_prefix()
-
-        expected_prefix = prefix + " "
+        """Handle KRunner Match requests and return result tuples."""
         lowered_query = query.lower().strip()
-        if lowered_query == prefix:
+        accepted_prefixes = self._get_accepted_prefixes()
+        if lowered_query in accepted_prefixes:
             return Commands.autocompleteMatches("")
 
-        if not query.lower().startswith(expected_prefix):
+        matched_prefix = ""
+        for prefix in accepted_prefixes:
+            expected_prefix = prefix + " "
+            if query.lower().startswith(expected_prefix):
+                matched_prefix = expected_prefix
+                break
+
+        if matched_prefix == "":
             return []
 
-        query = query[len(expected_prefix) :].strip()
+        query = query[len(matched_prefix) :].strip()
 
         if query == "":
             return Commands.autocompleteMatches("")
@@ -94,11 +113,17 @@ class Runner(dbus.service.Object):
                 ]
             logger.warning("Match runtime error: %s", e)
             return []
+        except SpotifyException as e:
+            message = f"Spotify API error ({e.http_status})"
+            if e.http_status == 403:
+                message = "Spotify API denied request (403). Check app/user permissions."
+            return [("", message, "Spotify", 100, 100, {})]
         except Exception as e:
             logger.exception("Unexpected match error: %s", e)
             return []
 
     def _run_impl(self, data: str, action_id: str):
+        """Handle KRunner Run requests for selected command/result."""
         del action_id
 
         # If data is a Spotify URI (from search results), handle it directly
@@ -106,11 +131,11 @@ class Runner(dbus.service.Object):
             handle_spotify_uri(self.spotify, data)
             return
 
-        prefix = self._get_prefix()
-
-        expected_prefix = prefix + " "
-        if data.lower().startswith(expected_prefix):
-            data = data[len(expected_prefix) :].strip()
+        for prefix in self._get_accepted_prefixes():
+            expected_prefix = prefix + " "
+            if data.lower().startswith(expected_prefix):
+                data = data[len(expected_prefix) :].strip()
+                break
 
         if data == "":
             return
@@ -126,6 +151,8 @@ class Runner(dbus.service.Object):
             Commands.executeCommand(command, self.spotify).Run(data)
         except RuntimeError as e:
             logger.warning("Run runtime error: %s", e)
+        except SpotifyException as e:
+            logger.warning("Spotify API error during run (%s): %s", e.http_status, e)
         except Exception as e:
             logger.exception("Unexpected run error: %s", e)
 

@@ -2,6 +2,9 @@
 
 Type `spe` in KRunner to see command autocomplete.
 
+Legacy compatibility (optional): if `ENABLE_LEGACY_SP_ALIAS = True` is set in the
+config, `sp` can also be used as prefix.
+
 ## Common examples
 
 - `spe login`

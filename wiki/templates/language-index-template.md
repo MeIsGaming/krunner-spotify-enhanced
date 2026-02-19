@@ -1,4 +1,4 @@
-# <Language> Wiki
+# Language Wiki Template
 
 ## Pages
 
@@ -8,6 +8,7 @@
 
 ## Notes
 
+- Replace "Language" in the title with your language name.
 - Command prefix: `spe`
 - Keep examples short and executable.
 - Keep terminology consistent across pages.

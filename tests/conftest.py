@@ -1,15 +1,18 @@
-[Settings]
+from pathlib import Path
+
+
+TEST_CONFIG = """[Settings]
 VOLUME_STEP = 10
 MAX_RESULTS = 5
-SPOTIFY_URL = https://open.spotify.com              
-ACCES_SCOPE = user-modify-playback-state user-read-playback-state user-library-read user-library-modify user-read-playback-position user-top-read
-CLIENT_ID = 235d6b1970794b92b39c008451f5ec5b
+SPOTIFY_URL = https://open.spotify.com
+ACCES_SCOPE = user-modify-playback-state user-read-playback-state
+CLIENT_ID = test-client-id
 REDIRECT_URI = http://127.0.0.1:3000/callback
 CACHE_PATH = ~/.cache/KRunnerSpotify/.cache
 CASE_SENSITIVE = False
 COMMAND_PREFIX = spe
 ENABLE_LEGACY_SP_ALIAS = False
-CONFIG_EDITOR = /usr/bin/kate
+CONFIG_EDITOR = /usr/bin/true
 INCREASE_VOLUME_CHARACTER = +
 DECREASE_VOLUME_CHARACTER = -
 
@@ -43,3 +46,16 @@ REWIND_COMMAND = Rewind
 SEEK_COMMAND = Seek
 SET_VOLUME_COMMAND = SetVol
 SHUFFLE_COMMAND = Shuffle
+"""
+
+
+def ensure_test_config() -> Path:
+    config_dir = Path.home() / ".config" / "KRunner-Spotify"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_file = config_dir / "KRunner-Spotify.config"
+    config_file.write_text(TEST_CONFIG, encoding="utf-8")
+
+    cache_dir = Path.home() / ".cache" / "KRunnerSpotify"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    (cache_dir / ".cache").touch()
+    return config_file

@@ -16,12 +16,19 @@ class SetVolume(Command):
         super().__init__(getCommandName("SET_VOLUME_COMMAND"), spotify)
 
     def Match(self, query: str):
-        if self.spotify.current_playback()["device"]["type"] in DEVICES_WITHOUT_VOLUME_CONTROL:
+        playback = self.spotify.current_playback()
+        if not playback or not playback.get("device"):
+            return [("", "No active playback device found", "Spotify", 100, 100, {})]
+
+        if playback["device"]["type"] in DEVICES_WITHOUT_VOLUME_CONTROL:
             return [
                 ("", "Volume cannot be controlled on the current device", "Spotify", 100, 100, {})
             ]
 
         query = query.strip(" ")
+        if query == "":
+            return self.setVolumeByChoice()
+
         returnOptions = []
         if query.isnumeric() and len(query) > 0:
             returnOptions = self.setVolumeByValue(query)
@@ -37,9 +44,7 @@ class SetVolume(Command):
             if (decreaseCharacters == 0 and increaseCharacters == 1) or (
                 decreaseCharacters == 1 and increaseCharacters == 0
             ):
-                SetVolume.currentVolume = self.spotify.current_playback()["device"][
-                    "volume_percent"
-                ]
+                SetVolume.currentVolume = playback["device"]["volume_percent"]
             if decreaseCharacters > SetVolume.previousDecreaseCharacters:
                 SetVolume.currentVolume = SetVolume.currentVolume - int(
                     getSetting("VOLUME_STEP")
