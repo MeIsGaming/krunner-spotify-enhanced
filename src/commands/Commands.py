@@ -1,7 +1,7 @@
 """Command registry, lookup, and autocomplete helpers."""
 
-from importlib import import_module
 from functools import lru_cache
+from importlib import import_module
 
 from Config import getCommandName
 
