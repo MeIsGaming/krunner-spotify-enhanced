@@ -23,31 +23,51 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
 
+      - name: Validate required secrets
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${AUR_SSH_PRIVATE_KEY}" ]]; then
+            echo "AUR_SSH_PRIVATE_KEY secret is missing"
+            exit 1
+          fi
+
       - name: Trust AUR host key
         run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
           ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
 
       - name: Configure git identity
+        env:
+          AUR_GIT_USER_NAME: ${{ secrets.AUR_GIT_USER_NAME }}
+          AUR_GIT_USER_EMAIL: ${{ secrets.AUR_GIT_USER_EMAIL }}
         run: |
-          git config --global user.name "${{ secrets.AUR_GIT_USER_NAME || 'github-actions[bot]' }}"
-          git config --global user.email "${{ secrets.AUR_GIT_USER_EMAIL || 'github-actions[bot]@users.noreply.github.com' }}"
+          set -euo pipefail
+          git config --global user.name "${AUR_GIT_USER_NAME:-github-actions[bot]}"
+          git config --global user.email "${AUR_GIT_USER_EMAIL:-github-actions[bot]@users.noreply.github.com}"
 
       - name: Clone AUR repository
         run: |
+          set -euo pipefail
           git clone ssh://aur@aur.archlinux.org/krunner-spotify-enhanced-git.git aur-repo
+          git -C aur-repo branch --show-current
 
       - name: Sync package files
         run: |
+          set -euo pipefail
           rsync -av --delete --exclude '.git' packaging/aur/ aur-repo/
+          git -C aur-repo status --short
 
       - name: Commit and push changes
         working-directory: aur-repo
         run: |
-          if git diff --quiet; then
+          set -euo pipefail
+          git add -A
+          if git diff --cached --quiet; then
             echo "No AUR changes to publish."
             exit 0
           fi
-          git add -A
           git commit -m "Update from GitHub Actions (${GITHUB_SHA::7})"
-          git push
+          git push origin HEAD:master
