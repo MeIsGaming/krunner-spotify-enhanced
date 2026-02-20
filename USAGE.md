@@ -2,6 +2,25 @@
 
 This plugin allows you to easily control [Spotify](https://www.spotify.com/) using [KRunner](https://github.com/KDE/krunner). The plugin uses [Spotipy](https://github.com/plamere/spotipy) to interact with the [Spotify Web API](https://developer.spotify.com/documentation/web-api/). Using only a handful of words the user can control Spotify in a straightforward manner, even if Spotify does not run on the same device as KRunner is running.
 
+# Command discovery shortcuts
+
+Use these to quickly discover commands in KRunner:
+
+* `spe help`
+* `spe list`
+* `spe ?`
+* `spe commands`
+* `spe cmds`
+
+KRunner may display only part of all returned results. Use paging/filtering:
+
+* `spe list 2`
+* `spe list 3`
+* `spe list next`
+* `spe list prev`
+* `spe list vol`
+* `spe help play`
+
 # Queries
 
 The queries which can be entered are made out of the following parts:

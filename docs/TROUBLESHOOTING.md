@@ -6,6 +6,18 @@
 - Open KRunner and run `spe login` once to refresh your token.
 - Run `./debug.sh` and check for Python exceptions.
 
+## `spe list` / `spe help` only shows ~10 entries
+
+- The runner can return many commands, but KRunner UI may show only a limited amount at once.
+- Use paging commands:
+  - `spe list 2`
+  - `spe list 3`
+  - `spe list next`
+  - `spe list prev`
+- Use filtered discovery for faster selection:
+  - `spe list vol`
+  - `spe help play`
+
 ## Spotify API 403 (commands appear but do nothing)
 
 - If KRunner shows `Spotify API denied request (403)`, your account is likely not allowed for your Spotify app.

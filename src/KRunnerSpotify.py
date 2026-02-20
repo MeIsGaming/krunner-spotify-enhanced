@@ -35,6 +35,8 @@ iface2 = "org.kde.krunner2"
 class Runner(dbus.service.Object):
     """DBus-backed KRunner runner for Spotify commands."""
 
+    _LIST_PAGE_SIZE = 10
+
     def __init__(self):
         """Initialize DBus object and Spotify PKCE client."""
         dbus.service.Object.__init__(
@@ -72,10 +74,18 @@ class Runner(dbus.service.Object):
         return {
             self._normalize_command("help"),
             self._normalize_command("list"),
+            self._normalize_command("commands"),
+            self._normalize_command("cmds"),
+            self._normalize_command("?"),
             "HELP",
             "LIST",
+            "COMMANDS",
+            "CMDS",
+            "?",
             "help",
             "list",
+            "commands",
+            "cmds",
         }
 
     def _autocomplete_with_prefix(self, prefix: str, command_prefix: str):
@@ -84,9 +94,13 @@ class Runner(dbus.service.Object):
 
         normalized_help = self._normalize_command("help")
         normalized_list = self._normalize_command("list")
+        normalized_commands = self._normalize_command("commands")
+        normalized_cmds = self._normalize_command("cmds")
         builtins = [
             (normalized_help, "Show all available commands"),
             (normalized_list, "Show all available commands"),
+            (normalized_commands, "Show all available commands"),
+            (normalized_cmds, "Show all available commands"),
         ]
 
         for command, title in builtins:
@@ -118,6 +132,84 @@ class Runner(dbus.service.Object):
                 )
             )
         return prefixed_matches
+
+    def _list_page(self, prefix: str, page: int, filter_query: str = ""):
+        """Return one page of list/help results to handle KRunner UI result caps."""
+        if page < 1:
+            page = 1
+
+        all_matches = self._autocomplete_with_prefix(prefix, "")
+        if filter_query.strip() != "":
+            needle = filter_query.strip().lower()
+            all_matches = [
+                match
+                for match in all_matches
+                if needle in match[0].lower() or needle in match[1].lower()
+            ]
+
+        start = (page - 1) * self._LIST_PAGE_SIZE
+        end = start + self._LIST_PAGE_SIZE
+        page_matches = all_matches[start:end]
+
+        if not page_matches:
+            return [
+                (
+                    "",
+                    f"No commands on page {page}. Try: {prefix} list 1",
+                    "Spotify",
+                    100,
+                    100,
+                    {},
+                )
+            ]
+
+        total_pages = (len(all_matches) + self._LIST_PAGE_SIZE - 1) // self._LIST_PAGE_SIZE
+        if page < total_pages:
+            page_matches.append(
+                (
+                    f"{prefix} LIST {page + 1}",
+                    f"Type '{prefix} list {page + 1}' for more commands ({page + 1}/{total_pages})",
+                    "Spotify",
+                    99,
+                    99,
+                    {},
+                )
+            )
+
+        if page > 1:
+            page_matches.append(
+                (
+                    f"{prefix} LIST {page - 1}",
+                    f"Type '{prefix} list {page - 1}' to go back ({page - 1}/{total_pages})",
+                    "Spotify",
+                    98,
+                    98,
+                    {},
+                )
+            )
+
+        return page_matches
+
+    def _parse_list_arguments(self, arguments: str) -> tuple[int, str]:
+        """Parse list/help arguments into page number and optional text filter."""
+        tokens = [token for token in arguments.strip().split() if token != ""]
+        page = 1
+        filter_parts = []
+
+        for token in tokens:
+            lowered_token = token.lower()
+            if lowered_token in {"next", "n"}:
+                page += 1
+            elif lowered_token in {"prev", "previous", "back", "b"}:
+                page = max(1, page - 1)
+            elif lowered_token.startswith("p") and lowered_token[1:].isdigit():
+                page = int(lowered_token[1:])
+            elif lowered_token.isdigit():
+                page = int(lowered_token)
+            else:
+                filter_parts.append(token)
+
+        return page, " ".join(filter_parts)
 
     def _spotify_error_message(self, error: SpotifyException) -> str:
         """Create user-facing message for common Spotify API failures."""
@@ -161,7 +253,8 @@ class Runner(dbus.service.Object):
             command = self._normalize_command(command)
 
             if command in self._help_aliases():
-                return self._autocomplete_with_prefix(matched_prefix.strip(), arguments)
+                page, filter_query = self._parse_list_arguments(arguments)
+                return self._list_page(matched_prefix.strip(), page, filter_query)
 
             if arguments == "" and command not in Commands.getCommandNames():
                 return self._autocomplete_with_prefix(matched_prefix.strip(), command)

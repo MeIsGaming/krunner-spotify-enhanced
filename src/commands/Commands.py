@@ -84,7 +84,12 @@ def getCommandNames():
 
 def autocompleteMatches(command_prefix: str):
     """Create autocomplete tuples for a partial command name."""
-    command_prefix = command_prefix or ""
+    return list(_autocomplete_matches_cached(command_prefix or ""))
+
+
+@lru_cache(maxsize=128)
+def _autocomplete_matches_cached(command_prefix: str):
+    """Cached autocomplete tuples for a partial command name."""
     descriptions = _build_command_descriptions()
     matches = []
     for command_name in getCommandNames():
@@ -100,7 +105,15 @@ def autocompleteMatches(command_prefix: str):
                 {},
             )
         )
-    return matches
+    return tuple(matches)
+
+
+def clearCaches():
+    """Clear command registry/autocomplete caches after config changes."""
+    _build_command_module_map.cache_clear()
+    _build_command_name_map.cache_clear()
+    _build_command_descriptions.cache_clear()
+    _autocomplete_matches_cached.cache_clear()
 
 
 def executeCommand(command, spotify):

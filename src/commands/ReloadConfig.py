@@ -1,5 +1,6 @@
 from Config import getCommandName, loadConfig
 
+from . import Commands
 from .Command import Command
 
 
@@ -14,3 +15,4 @@ class ReloadConfig(Command):
 
     def Run(self, data: str):
         loadConfig()
+        Commands.clearCaches()

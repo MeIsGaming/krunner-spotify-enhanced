@@ -16,4 +16,27 @@ config, `sp` can also be used as prefix.
 - `spe trackinfo`
 - `spe setvol 50`
 
+## Command discovery (help/list)
+
+KRunner can display a limited amount of visible results at once. Use discovery shortcuts:
+
+- `spe help`
+- `spe list`
+- `spe ?`
+- `spe commands`
+- `spe cmds`
+
+Paging examples:
+
+- `spe list 2`
+- `spe list 3`
+- `spe list next`
+- `spe list prev`
+
+Filter examples:
+
+- `spe list vol`
+- `spe help play`
+- `spe commands info`
+
 For the full command set, see [USAGE.md](../../USAGE.md).

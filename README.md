@@ -65,11 +65,34 @@ spe trackinfo
 spe
 spe help
 spe list
+spe ?
+spe commands
+spe list 2
+spe list vol
+spe list 2 vol
 spe login
 spe play bohemian rhapsody
 spe next
 spe pause
 spe resume
+```
+
+KRunner often shows only the first ~10 visible results at once. Use paging for full list views:
+
+```text
+spe list 1
+spe list 2
+spe list 3
+spe list next
+spe list prev
+```
+
+You can also filter command discovery by text:
+
+```text
+spe list vol
+spe help play
+spe commands info
 ```
 
 Full command reference: [USAGE.md](USAGE.md)
