@@ -1,3 +1,5 @@
+"""Main DBus runner implementation for KRunner SpotifyEnhanced."""
+
 import logging
 import os
 import sys

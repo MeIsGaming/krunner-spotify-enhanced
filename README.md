@@ -138,7 +138,7 @@ the user `systemd` service keeps the runner available in the background.
 - [CONTRIBUTING.md](CONTRIBUTING.md): contribution rules
 - [CREDITS.md](CREDITS.md): attribution and maintainer info
 - [CHANGELOG.md](CHANGELOG.md): release notes
-- [packaging/aur](packaging/aur): AUR `-git` package files
+- [packaging/aur](packaging/aur): AUR `-git` package files (builds from upstream `main`)
 - [packaging/aur-stable](packaging/aur-stable): AUR stable package files
 
 ## Maintainer

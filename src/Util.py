@@ -1,8 +1,11 @@
+"""Utility helpers for query parsing and Spotify URI playback handling."""
+
 import re
 import webbrowser
 
 
 def parseSearchQuery(query):
+    """Split a search query and optional page suffix (`pN`)."""
     query = query.lstrip(" ")
     if query == "":
         return query, 1
@@ -16,6 +19,7 @@ def parseSearchQuery(query):
 
 
 def parsePage(query):
+    """Parse page number suffix from query, defaulting to page 1."""
     query = query.lstrip(" ")
     page = 1
     if query == "":
@@ -27,32 +31,35 @@ def parsePage(query):
 
 
 def parseArtists(results):
-    parsedResults = []
+    """Map Spotify artist results to KRunner tuple format."""
+    parsed_results = []
 
     for artist in results["items"]:
-        parsedResults.append((artist["uri"], artist["name"], "Spotify", 100, 100, {}))
-    if not parsedResults:
-        parsedResults.append(("", "No artists found!", "Spotify", 100, 100, {}))
-    return parsedResults
+        parsed_results.append((artist["uri"], artist["name"], "Spotify", 100, 100, {}))
+    if not parsed_results:
+        parsed_results.append(("", "No artists found!", "Spotify", 100, 100, {}))
+    return parsed_results
 
 
 def parseTracks(results):
-    parsedResults = []
+    """Map Spotify track results to KRunner tuple format."""
+    parsed_results = []
     for track in results["tracks"]["items"]:
         track_details = track["name"] + " - " + track["album"]["artists"][0]["name"]
-        parsedResults.append((track["uri"], track_details, "Spotify", 100, 100, {}))
-    if not parsedResults:
-        parsedResults.append(("", "No tracks found!", "Spotify", 100, 100, {}))
-    return parsedResults
+        parsed_results.append((track["uri"], track_details, "Spotify", 100, 100, {}))
+    if not parsed_results:
+        parsed_results.append(("", "No tracks found!", "Spotify", 100, 100, {}))
+    return parsed_results
 
 
 def parsePlaylists(playlists):
-    parsedResults = []
+    """Map Spotify playlist results to KRunner tuple format."""
+    parsed_results = []
     for playlist in playlists["items"]:
-        parsedResults.append((playlist["uri"], playlist["name"], "Spotify", 100, 100, {}))
-    if not parsedResults:
-        parsedResults.append(("", "No playlists found!", "Spotify", 100, 100, {}))
-    return parsedResults
+        parsed_results.append((playlist["uri"], playlist["name"], "Spotify", 100, 100, {}))
+    if not parsed_results:
+        parsed_results.append(("", "No playlists found!", "Spotify", 100, 100, {}))
+    return parsed_results
 
 
 def parse_spotify_uri(uri: str):

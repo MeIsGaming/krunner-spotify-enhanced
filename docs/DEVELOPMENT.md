@@ -45,3 +45,8 @@ Optional integration run:
 - Keep `README.md` and `CREDITS.md` updated when ownership changes.
 - Keep this fork attribution clear (GPL and upstream credits).
 - Keep AUR metadata in `packaging/aur` and `packaging/aur-stable` in sync.
+
+Regenerate AUR metadata after PKGBUILD updates:
+
+- `cd packaging/aur && makepkg --printsrcinfo > .SRCINFO`
+- `cd packaging/aur-stable && makepkg --printsrcinfo > .SRCINFO`

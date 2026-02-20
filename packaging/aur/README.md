@@ -7,6 +7,12 @@ Package name: `krunner-spotify-enhanced-git`
 - `PKGBUILD`
 - `.SRCINFO`
 
+## Behavior
+
+- `-git` package builds directly from upstream `main`.
+- Version is generated automatically via `pkgver()` from git commit count + short hash.
+- Use `pkgrel` only for packaging-only changes (no upstream code change).
+
 ## Generate/update `.SRCINFO`
 
 ```bash

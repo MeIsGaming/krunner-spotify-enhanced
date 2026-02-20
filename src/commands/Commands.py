@@ -1,3 +1,5 @@
+"""Command registry, lookup, and autocomplete helpers."""
+
 from functools import lru_cache
 
 from Config import getCommandName
