@@ -63,6 +63,8 @@ spe trackinfo
 
 ```text
 spe
+spe help
+spe list
 spe login
 spe play bohemian rhapsody
 spe next

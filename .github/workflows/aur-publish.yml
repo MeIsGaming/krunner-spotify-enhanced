@@ -1,0 +1,53 @@
+name: Publish AUR Package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "packaging/aur/**"
+      - ".github/workflows/aur-publish.yml"
+
+jobs:
+  publish-aur:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+
+      - name: Trust AUR host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name "${{ secrets.AUR_GIT_USER_NAME || 'github-actions[bot]' }}"
+          git config --global user.email "${{ secrets.AUR_GIT_USER_EMAIL || 'github-actions[bot]@users.noreply.github.com' }}"
+
+      - name: Clone AUR repository
+        run: |
+          git clone ssh://aur@aur.archlinux.org/krunner-spotify-enhanced-git.git aur-repo
+
+      - name: Sync package files
+        run: |
+          rsync -av --delete --exclude '.git' packaging/aur/ aur-repo/
+
+      - name: Commit and push changes
+        working-directory: aur-repo
+        run: |
+          if git diff --quiet; then
+            echo "No AUR changes to publish."
+            exit 0
+          fi
+          git add -A
+          git commit -m "Update from GitHub Actions (${GITHUB_SHA::7})"
+          git push

@@ -67,10 +67,44 @@ class Runner(dbus.service.Object):
             return command.upper()
         return command
 
+    def _help_aliases(self) -> set[str]:
+        """Return normalized built-in aliases that show command list."""
+        return {
+            self._normalize_command("help"),
+            self._normalize_command("list"),
+            "HELP",
+            "LIST",
+            "help",
+            "list",
+        }
+
     def _autocomplete_with_prefix(self, prefix: str, command_prefix: str):
         """Return autocomplete results with runner prefix in the command payload."""
-        matches = Commands.autocompleteMatches(command_prefix)
         prefixed_matches = []
+
+        normalized_help = self._normalize_command("help")
+        normalized_list = self._normalize_command("list")
+        builtins = [
+            (normalized_help, "Show all available commands"),
+            (normalized_list, "Show all available commands"),
+        ]
+
+        for command, title in builtins:
+            if command_prefix and not command.startswith(command_prefix):
+                continue
+            display_command = f"{prefix} {command.lower()}"
+            prefixed_matches.append(
+                (
+                    f"{prefix} {command}",
+                    f"{display_command} — {title}",
+                    "Spotify",
+                    100,
+                    100,
+                    {},
+                )
+            )
+
+        matches = Commands.autocompleteMatches(command_prefix)
         for command, title, icon, relevance, score, actions in matches:
             display_command = f"{prefix} {command.lower()}"
             prefixed_matches.append(
@@ -126,6 +160,9 @@ class Runner(dbus.service.Object):
         try:
             command = self._normalize_command(command)
 
+            if command in self._help_aliases():
+                return self._autocomplete_with_prefix(matched_prefix.strip(), arguments)
+
             if arguments == "" and command not in Commands.getCommandNames():
                 return self._autocomplete_with_prefix(matched_prefix.strip(), command)
 
@@ -175,6 +212,9 @@ class Runner(dbus.service.Object):
             data = ""
 
         command = self._normalize_command(command)
+        if command in self._help_aliases():
+            return
+
         try:
             Commands.executeCommand(command, self.spotify).Run(data)
         except RuntimeError as e:
