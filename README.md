@@ -1,3 +1,7 @@
+> **This repository has moved.**
+> It now lives at <https://git.purrr.chat/ashley/krunner-spotify>.
+> This copy is archived and receives no further updates.
+
 # KRunner SpotifyEnhanced
 
 Control [Spotify](https://www.spotify.com/) directly from
